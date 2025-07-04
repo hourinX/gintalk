@@ -2,16 +2,15 @@ server:
   port: 8080
   host: "0.0.0.0"
 
-database:
-  mysql:
-    host: "127.0.0.1"
-    port: 3306
-    username: "root"
-    password: "123456"
-    database: "go_online_chat"
-    charset: "utf8mb4"
-    parseTime: true
-    loc: "Local"
+mysql:
+  host: "127.0.0.1"
+  port: 3306
+  username: "root"
+  password: "Szjm270017!"
+  database: "onlinechat"
+  charset: "utf8mb4"
+  parseTime: true
+  loc: "Local"
 
 redis:
   host: "127.0.0.1"

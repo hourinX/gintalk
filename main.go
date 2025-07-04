@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"gin-online-chat-backend/router"
-	"gin-online-chat-backend/system"
+	"gin-online-chat-backend/systems"
 	"log"
 	"os"
 	"os/signal"
@@ -11,21 +11,21 @@ import (
 )
 
 func main() {
-	if err := system.LoadConfig("config/config.yml"); err != nil {
+	if err := systems.LoadConfig("config/config.yml"); err != nil {
 		log.Fatalf("配置文件加载失败: %v", err)
 	}
 
-	if err := system.InitDatabase(); err != nil {
+	if err := systems.InitDatabase(); err != nil {
 		log.Fatalf("数据库初始化失败: %v", err)
 	}
-	defer system.CloseDatabase()
+	defer systems.CloseDatabase()
 
-	if err := system.InitRedis(); err != nil {
+	if err := systems.InitRedis(); err != nil {
 		log.Fatalf("Redis初始化失败: %v", err)
 	}
-	defer system.CloseRedis()
+	defer systems.CloseRedis()
 
-	if err := system.InitElasticsearch(); err != nil {
+	if err := systems.InitElasticsearch(); err != nil {
 		log.Fatalf("ElasticSearch初始化失败: %v", err)
 	} else {
 		// 创建用户索引
@@ -36,7 +36,7 @@ func main() {
 	}
 
 	r := router.SetupRouter()
-	config := system.GetConfig()
+	config := systems.GetConfig()
 	addr := fmt.Sprintf("%s:%s", config.Server.Host, config.Server.Port)
 	log.Printf("服务启动中,正在监听地址: %s", addr)
 
