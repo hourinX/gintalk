@@ -1,0 +1,44 @@
+server:
+  port: 8080
+  host: "0.0.0.0"
+
+database:
+  mysql:
+    host: "127.0.0.1"
+    port: 3306
+    username: "root"
+    password: "123456"
+    database: "go_online_chat"
+    charset: "utf8mb4"
+    parseTime: true
+    loc: "Local"
+
+redis:
+  host: "127.0.0.1"
+  port: 6379
+  password: ""
+  db: 0
+
+elasticsearch:
+  url: "http://127.0.0.1:9200"
+  username: ""
+  password: ""
+
+jwt:
+  secret: "Rz1n2X7oV8kL9q0uP5hB4wT3yE6iDcSfXzWtYvUaQrKpJmMlNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789-_"
+  expireHours: 24
+
+captcha:
+  expire_seconds: 120
+  length: 5
+
+rate_limit:
+  registration_per_minute: 3
+  ip_block_minutes: 10
+
+security:
+  ipRegisterLimit: 3
+  ipRegisterWindow: 60  # seconds
+  ipBlockDuration: 86400  # seconds (24 hours)
+  captchaExpire: 300  # seconds (5 minutes)
+
