@@ -23,3 +23,11 @@ var CodeMap = map[string]int{
 	"conflict":     CodeConflict,
 	"too_many_req": CodeTooManyRequest,
 }
+
+const (
+	MaxIDLength = 20 // ID最大长度
+)
+
+const (
+	StatusUp = 1 // 状态正常
+)

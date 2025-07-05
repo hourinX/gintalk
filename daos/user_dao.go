@@ -1,22 +1,35 @@
 package daos
 
 import (
+	"gin-online-chat-backend/commons"
 	"gin-online-chat-backend/commons/utils"
 	"gin-online-chat-backend/models"
 	"gin-online-chat-backend/systems"
+	"time"
 )
 
 func RegisterUser(user *models.User) error {
-	id, err := utils.GenerateNumericID()
+	id, err := utils.GenerateNumericID(commons.MaxIDLength)
 	if err != nil {
 		return err
 	}
 	user.Id = id
-	return systems.DB.Create(user).Error
+	user.IsFrozen = 1
+	user.CreateTime = time.Now()
+	user.UpdateTime = time.Now()
+	if user.UserCode == "" {
+		code, err := utils.GenerateUniqueUserCodeWithRetry()
+		if err != nil {
+			return err
+		}
+		user.UserCode = code
+	}
+	return systems.DB.Table(commons.TableImUser).Create(user).Error
 }
 
-func GetUserByUserName(username string) (*models.User, error) {
+func GetUserByCondition(w *models.UserWhere, field string) (*models.User, error) {
 	var user models.User
-	err := systems.DB.Where("user_name = ?", username).First(&user).Error
+	where, args := parseUserWhere(w)
+	err := systems.DB.Table(commons.TableImUser).Select(field).Where(where, args...).First(&user).Error
 	return &user, err
 }

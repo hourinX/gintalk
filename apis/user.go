@@ -26,10 +26,10 @@ func Login(c *gin.Context) {
 		commons.Fail(c, commons.CodeParamError, "参数错误: "+err.Error())
 		return
 	}
-	token, err := user.UserLogin(&req)
+	data, err := user.UserLogin(&req)
 	if err != nil {
 		commons.Fail(c, commons.CodeServerError, err.Error())
 		return
 	}
-	commons.Success(c, "登录成功", token)
+	commons.Success(c, "登录成功", data)
 }

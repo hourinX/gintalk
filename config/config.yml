@@ -26,6 +26,7 @@ elasticsearch:
 jwt:
   secret: "Rz1n2X7oV8kL9q0uP5hB4wT3yE6iDcSfXzWtYvUaQrKpJmMlNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789-_"
   expireHours: 24
+  issuer: "OnlineChat"
 
 captcha:
   expire_seconds: 120
