@@ -1,7 +1,10 @@
+<<<<<<< HEAD
 <script setup>
 import HelloWorld from './components/HelloWorld.vue'
 </script>
 
+=======
+>>>>>>> de58b6a0c79b5c88406fc6992919413a2249b927
 <template>
   <div>
     <a href="https://vite.dev" target="_blank">
@@ -11,9 +14,27 @@ import HelloWorld from './components/HelloWorld.vue'
       <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
     </a>
   </div>
+<<<<<<< HEAD
   <HelloWorld msg="Vite + Vue" />
 </template>
 
+=======
+  11111
+  <HelloWorld msg="Vite + Vue" />
+</template>
+
+<script setup>
+import HelloWorld from './components/HelloWorld.vue'
+import {post} from "./utils/request.js"
+import {onMounted} from "vue";
+
+onMounted(async ()=>{
+  console.log(111)
+  await post("/user/register")
+})
+</script>
+
+>>>>>>> de58b6a0c79b5c88406fc6992919413a2249b927
 <style scoped>
 .logo {
   height: 6em;

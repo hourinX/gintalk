@@ -9,6 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+<<<<<<< HEAD
+=======
+    "axios": "^1.10.0",
+>>>>>>> de58b6a0c79b5c88406fc6992919413a2249b927
     "vue": "^3.5.17"
   },
   "devDependencies": {
