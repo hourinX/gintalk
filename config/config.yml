@@ -3,11 +3,11 @@ server:
   host: "0.0.0.0"
 
 mysql:
-  host: "127.0.0.1"
+  host: "117.72.47.192"
   port: 3306
-  username: "root"
-  password: "Szjm270017!"
-  database: "onlinechat"
+  username: "imuser"
+  password: "Im456pwd!"
+  database: "imchat"
   charset: "utf8mb4"
   parseTime: true
   loc: "Local"
