@@ -13,6 +13,7 @@ func SetupRouter() *gin.Engine {
 	{
 		apiUserGroup.POST("register", apis.Register)
 		apiUserGroup.POST("login", apis.Login)
+		apiUserGroup.POST("captcha", apis.Captcha)
 	}
 	//apis.Register(r)
 	return r

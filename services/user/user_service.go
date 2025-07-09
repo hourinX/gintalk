@@ -58,3 +58,7 @@ func UserLogin(model *UserLoginModel) (*ReadUserLoginModel, error) {
 	}
 	return data, nil
 }
+
+func UserCaptcha() (string, error) {
+	return "", nil
+}
