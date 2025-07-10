@@ -9,6 +9,13 @@ import (
 )
 
 func UserRegister(model *UserRegisterModel) error {
+	if model.UserName == "" {
+		return errors.New("用户名不能为空")
+	}
+	if model.Password == "" {
+		return errors.New("密码不能为空")
+	}
+
 	if u, _ := daos.GetUserByCondition(&models.UserWhere{UserName: model.UserName}, "id"); u.Id != "" {
 		return errors.New("用户名已存在")
 	}
