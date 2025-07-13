@@ -21,7 +21,7 @@ const router = createRouter({
       path: '/login',
       name: 'Login',
       meta: {
-        title: 'login',
+        title: 'Welcome to GinTalk',
         requiresAuth: false,
       },
       component:() => import('@/views/login/index2.vue')
