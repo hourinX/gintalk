@@ -11,6 +11,8 @@ mysql:
   charset: "utf8mb4"
   parseTime: true
   loc: "Local"
+  maxOpenConnects: 10
+  maxIdleConnects: 5
 
 redis:
   host: "127.0.0.1"

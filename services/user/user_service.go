@@ -5,6 +5,7 @@ import (
 	"gin-online-chat-backend/commons/utils"
 	"gin-online-chat-backend/daos"
 	"gin-online-chat-backend/models"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -15,9 +16,11 @@ func UserRegister(model *UserRegisterModel) error {
 	if model.Password == "" {
 		return errors.New("密码不能为空")
 	}
-
-	if u, _ := daos.GetUserByCondition(&models.UserWhere{UserName: model.UserName}, "id"); u.Id != "" {
-		return errors.New("用户名已存在")
+	if model.Phone == "" {
+		return errors.New("手机号不能为空")
+	}
+	if u, _ := daos.GetUserByCondition(&models.UserWhere{Phone: model.Phone}, "id"); u.Id != "" {
+		return errors.New("当前手机号已被注册")
 	}
 	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(model.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -26,7 +29,6 @@ func UserRegister(model *UserRegisterModel) error {
 	user := &models.User{
 		UserName: model.UserName,
 		Password: string(hashedPwd),
-		Avatar:   model.Avatar,
 		Phone:    model.Phone,
 		Email:    model.Email,
 		Gender:   model.Gender,
@@ -39,6 +41,12 @@ func UserRegister(model *UserRegisterModel) error {
 }
 
 func UserLogin(model *UserLoginModel) (*ReadUserLoginModel, error) {
+	if model.UserCode == "" {
+		return nil, errors.New("用户账号不能为空")
+	}
+	if model.Password == "" {
+		return nil, errors.New("密码不能为空")
+	}
 	u, err := daos.GetUserByCondition(&models.UserWhere{
 		UserCode: model.UserCode,
 	}, "id,user_code,user_name,password,phone,email,avatar,gender,is_frozen")

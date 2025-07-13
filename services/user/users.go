@@ -3,7 +3,6 @@ package user
 type UserRegisterModel struct {
 	UserName string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
-	Avatar   string `json:"avatar"`
 	Phone    string `json:"phone"`
 	Email    string `json:"email"`
 	Gender   int    `json:"gender"`
@@ -12,7 +11,7 @@ type UserRegisterModel struct {
 type UserLoginModel struct {
 	UserCode string `json:"user_code" validate:"required"`
 	Password string `json:"password" validate:"required"`
-	Captcha  string `json:"captcha" validate:"required"`
+	Captcha  string `json:"captcha"`
 }
 
 type ReadUserLoginModel struct {
