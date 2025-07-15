@@ -4,6 +4,7 @@ import (
 	"gin-online-chat-backend/commons"
 	"gin-online-chat-backend/commons/utils"
 	"gin-online-chat-backend/services/user"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,12 +14,12 @@ func Register(c *gin.Context) {
 		commons.Fail(c, commons.CodeParamError, "参数错误: "+err.Error())
 		return
 	}
-	err := user.UserRegister(&req)
+	code, err := user.UserRegister(&req)
 	if err != nil {
 		commons.Fail(c, commons.CodeServerError, err.Error())
 		return
 	}
-	commons.Success(c, "注册成功", nil)
+	commons.Success(c, "注册成功", code)
 }
 
 func Login(c *gin.Context) {

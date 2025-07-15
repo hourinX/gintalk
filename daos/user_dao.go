@@ -8,10 +8,10 @@ import (
 	"time"
 )
 
-func RegisterUser(user *models.User) error {
+func RegisterUser(user *models.User) (string, error) {
 	id, err := utils.GenerateNumericID(commons.MaxIDLength)
 	if err != nil {
-		return err
+		return "", err
 	}
 	user.Id = id
 	user.IsFrozen = 1
@@ -20,11 +20,11 @@ func RegisterUser(user *models.User) error {
 	if user.UserCode == "" {
 		code, err := utils.GenerateUniqueUserCodeWithRetry()
 		if err != nil {
-			return err
+			return "", err
 		}
 		user.UserCode = code
 	}
-	return systems.DB.Table(commons.TableImUser).Create(user).Error
+	return user.UserCode, systems.DB.Table(commons.TableImUser).Create(user).Error
 }
 
 func GetUserByCondition(w *models.UserWhere, field string) (*models.User, error) {

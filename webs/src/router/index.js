@@ -13,9 +13,9 @@ const router = createRouter({
       path: '/',
       name: 'Home',
       meta: {
-        title: 'workspace',
+        title: 'GinTalk',
       },
-      component:() => import('@/views/layout/index.vue')
+      component:() => import('@/views/home/index.vue')
     },
     {
       path: '/login',
@@ -24,7 +24,7 @@ const router = createRouter({
         title: 'Welcome to GinTalk',
         requiresAuth: false,
       },
-      component:() => import('@/views/login/index2.vue')
+      component:() => import('@/views/login/index.vue')
     },
   ],
 })
@@ -35,6 +35,7 @@ router.beforeEach((to,from,next) => {
     next()
   } else {
     const token = localStorage.getItem('token')
+    console.log('token', token)
     if (!token) {
       next({ name: 'Login' })
       NProgress.done()
