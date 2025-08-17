@@ -34,8 +34,11 @@ const handleSignIn = async ()=> {
     loading.value = true
     
     const res = await login(signInForm)
+    loading.value = false
     if (res.code === 10000 && res.data) {
-      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('access_token', res.data.access_token);
+      localStorage.setItem('refresh_token', res.data.refresh_token);
+      localStorage.setItem('expire_time', res.data.expire_time);
       if (remember.value) {
           localStorage.setItem('remember-account',JSON.stringify({
               user_code: signInForm.user_code,
@@ -51,7 +54,6 @@ const handleSignIn = async ()=> {
           }
       }
     }
-    loading.value = false
 }
 
 const signUpForm = reactive({

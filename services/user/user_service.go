@@ -56,20 +56,24 @@ func UserLogin(model *UserLoginModel) (*ReadUserLoginModel, error) {
 	if err = bcrypt.CompareHashAndPassword([]byte((u).Password), []byte(model.Password)); err != nil {
 		return nil, err
 	}
-	token, err := utils.GenerateToken(u.Id)
+	accessToken, expireTime, err := utils.GenerateToken(u.Id)
 	if err != nil {
 		return nil, err
 	}
+	refreshToken, _ := utils.GenerateRefreshToken(u.Id)
+
 	data := &ReadUserLoginModel{
-		Id:       u.Id,
-		UserName: u.UserName,
-		UserCode: u.UserCode,
-		Avatar:   u.Avatar,
-		Phone:    u.Phone,
-		Email:    u.Email,
-		Gender:   u.Gender,
-		IsFrozen: u.IsFrozen,
-		Token:    token,
+		Id:           u.Id,
+		UserName:     u.UserName,
+		UserCode:     u.UserCode,
+		Avatar:       u.Avatar,
+		Phone:        u.Phone,
+		Email:        u.Email,
+		Gender:       u.Gender,
+		IsFrozen:     u.IsFrozen,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		ExpireTime:   expireTime,
 	}
 	return data, nil
 }

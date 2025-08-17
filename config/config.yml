@@ -3,11 +3,16 @@ server:
   host: "0.0.0.0"
 
 mysql:
-  host: "117.72.47.192"
+  host: "127.0.0.1"
   port: 3306
-  username: "imuser"
-  password: "Im456pwd!"
-  database: "imchat"
+  username: "root"
+  password: "Szjm270017!"
+  database: "onlinechat"
+  # host: "117.72.47.192"
+  # port: 3306
+  # username: "imuser"
+  # password: "Im456pwd!"
+  # database: "imchat"
   charset: "utf8mb4"
   parseTime: true
   loc: "Local"
@@ -28,6 +33,7 @@ elasticsearch:
 jwt:
   secret: "Rz1n2X7oV8kL9q0uP5hB4wT3yE6iDcSfXzWtYvUaQrKpJmMlNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789-_"
   expireHours: 24
+  refreshDays: 7
   issuer: "OnlineChat"
 
 captcha:

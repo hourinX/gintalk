@@ -27,6 +27,7 @@ type ModelJwtConfig struct {
 	Secret      string
 	Issuer      string
 	ExpireHours int
+	RefreshDays int
 }
 
 type ModelElasticsearchConfig struct {

@@ -31,19 +31,46 @@ const router = createRouter({
 
 router.beforeEach((to,from,next) => {
   NProgress.start()
+
+  const accessToken = localStorage.getItem('access_token')
+  const expireTime = localStorage.getItem('expire_time')
+  const refreshToken = localStorage.getItem('refresh_token')
+  const isLoggedIn = accessToken && expireTime && refreshToken && isTokenValid()
+
   if (to.meta.requiresAuth === false) {
-    next()
-  } else {
-    const token = localStorage.getItem('token')
-    console.log('token', token)
-    if (!token) {
-      next({ name: 'Login' })
+    if (to.name === 'Login' && isLoggedIn) {
+      next({ name: 'Home' })
       NProgress.done()
     } else {
       next()
     }
+  } else {
+    if (isLoggedIn) {
+      next()
+    } else {
+      message.warning('Token has expired, please re-login first...')
+      clearAuth()
+      next({ name: 'Login' })
+      NProgress.done()
+    }
   }
 })
+
+const isTokenValid = () => {
+  const token = localStorage.getItem('access_token')
+  const expireTime = localStorage.getItem('expire_time')
+
+  if (!token || !expireTime) return false
+
+  const now = Date.now() / 1000
+  return now < expireTime
+}
+
+const clearAuth = () => {
+  localStorage.removeItem('access_token')
+  localStorage.removeItem('expire_time')
+  localStorage.removeItem('refresh_token')
+}
 
 router.afterEach((to) => {
   NProgress.done()
