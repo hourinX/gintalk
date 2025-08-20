@@ -1,102 +1,151 @@
+<script setup>
+import { ref, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router'
+import { CommentOutlined, TeamOutlined } from '@ant-design/icons-vue'
+
+const router = useRouter()
+const route = useRoute()
+
+const activeIcon = ref('');
+console.log('Current route name:', route.name)
+if (route.name) {
+  activeIcon.value = route.name.toLowerCase() === 'chat' ? 'chats' : route.name.toLowerCase()
+} else {
+  activeIcon.value = 'chats'
+}
+
+const icons = [
+  { key: 'chats', component: CommentOutlined, route: '/chat' },
+  { key: 'relations', component: TeamOutlined, route: '/relations' },
+]
+
+const handleIconClick = (key,route) => {
+  activeIcon.value = key
+  router.push(route)
+}
+
+watch(
+  () => route.name,
+  (newName) => {
+    if (newName) {
+      activeIcon.value = newName.toLowerCase() === 'chat' ? 'chats' : newName.toLowerCase()
+    }
+  },
+  { immediate: true }
+)
+</script>
+
 <template>
+  <a-layout>
+    <a-layout-header class="header">
+      <div class="logo no-select">
+        <img src="@/assets/logo.svg" alt="Logo" class="logo-img" />
+        <span class="logo-text">GinTalk</span>
+      </div>
+    </a-layout-header>
     <a-layout>
-      <a-layout-header class="header">
-        <div class="logo" />
-        <a-menu
-          v-model:selectedKeys="selectedKeys1"
-          theme="dark"
-          mode="horizontal"
-          :style="{ lineHeight: '64px' }"
+      <a-layout-sider width="50" class="sider" style="background: #fff">
+        <div class="icon-menu">
+          <component
+            v-for="item in icons"
+            :is="item.component"
+            :key="item.key"
+            class="menu-icon"
+            :class="{ active: activeIcon === item.key }"
+            @click="handleIconClick(item.key,item.route)"
+          />
+        </div>
+      </a-layout-sider>
+      <a-layout style="padding: 0 12px 12px">
+        <a-layout-content
+          :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }"
         >
-          <a-menu-item key="1">nav 1</a-menu-item>
-          <a-menu-item key="2">nav 2</a-menu-item>
-          <a-menu-item key="3">nav 3</a-menu-item>
-        </a-menu>
-      </a-layout-header>
-      <a-layout>
-        <a-layout-sider width="200" style="background: #fff">
-          <a-menu
-            v-model:selectedKeys="selectedKeys2"
-            v-model:openKeys="openKeys"
-            mode="inline"
-            :style="{ height: '100%', borderRight: 0 }"
-          >
-            <a-sub-menu key="sub1">
-              <template #title>
-                <span>
-                  <user-outlined />
-                  subnav 1
-                </span>
-              </template>
-              <a-menu-item key="1">option1</a-menu-item>
-              <a-menu-item key="2">option2</a-menu-item>
-              <a-menu-item key="3">option3</a-menu-item>
-              <a-menu-item key="4">option4</a-menu-item>
-            </a-sub-menu>
-            <a-sub-menu key="sub2">
-              <template #title>
-                <span>
-                  <laptop-outlined />
-                  subnav 2
-                </span>
-              </template>
-              <a-menu-item key="5">option5</a-menu-item>
-              <a-menu-item key="6">option6</a-menu-item>
-              <a-menu-item key="7">option7</a-menu-item>
-              <a-menu-item key="8">option8</a-menu-item>
-            </a-sub-menu>
-            <a-sub-menu key="sub3">
-              <template #title>
-                <span>
-                  <notification-outlined />
-                  subnav 3
-                </span>
-              </template>
-              <a-menu-item key="9">option9</a-menu-item>
-              <a-menu-item key="10">option10</a-menu-item>
-              <a-menu-item key="11">option11</a-menu-item>
-              <a-menu-item key="12">option12</a-menu-item>
-            </a-sub-menu>
-          </a-menu>
-        </a-layout-sider>
-        <a-layout style="padding: 0 24px 24px">
-          <a-breadcrumb style="margin: 16px 0">
-            <a-breadcrumb-item>Home</a-breadcrumb-item>
-            <a-breadcrumb-item>List</a-breadcrumb-item>
-            <a-breadcrumb-item>App</a-breadcrumb-item>
-          </a-breadcrumb>
-          <a-layout-content
-            :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }"
-          >
-            Content
-          </a-layout-content>
-        </a-layout>
+          <router-view />
+        </a-layout-content>
       </a-layout>
     </a-layout>
-  </template>
-  <script lang="ts" setup>
-  import { ref } from 'vue';
-  import { UserOutlined, LaptopOutlined, NotificationOutlined } from '@ant-design/icons-vue';
-  const selectedKeys1 = ref<string[]>(['2']);
-  const selectedKeys2 = ref<string[]>(['1']);
-  const openKeys = ref<string[]>(['sub1']);
-  </script>
-  <style scoped>
-  #components-layout-demo-top-side-2 .logo {
-    float: left;
-    width: 120px;
-    height: 31px;
-    margin: 16px 24px 16px 0;
-    background: rgba(255, 255, 255, 0.3);
-  }
-  
-  .ant-row-rtl #components-layout-demo-top-side-2 .logo {
-    float: right;
-    margin: 16px 0 16px 24px;
-  }
-  
-  .site-layout-background {
-    background: #fff;
-  }
-  </style>
-  
+  </a-layout>
+</template>
+
+<style scoped>
+#components-layout-demo-top-side-2 .logo {
+  float: left;
+  width: 120px;
+  height: 32px;
+  margin: 16px 24px 16px 0;
+  background: rgba(255, 255, 255, 0.3);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  align-content: center;
+  gap: 8px;
+}
+
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.ant-row-rtl #components-layout-demo-top-side-2 .logo {
+  float: right;
+  margin: 16px 0 16px 24px;
+}
+
+.site-layout-background {
+  background: #fff;
+}
+
+.ant-layout-header {
+  background: var(--color-primary) !important;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.logo-img {
+  height: 36px;
+  width: 36px;
+  user-drag: none;
+  -webkit-user-drag: none;
+}
+
+.logo-text {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+  color: #fff;
+  margin-left: 5px;
+}
+
+.sider {
+  background: #001529;
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.icon-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.menu-icon {
+  font-size: 28px;
+  color: #acacac !important;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.menu-icon:hover {
+  color: #595959 !important;
+}
+
+.menu-icon.active {
+  color: var(--color-primary) !important;
+}
+</style>

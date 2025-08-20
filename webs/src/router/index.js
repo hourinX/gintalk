@@ -1,6 +1,8 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
+import Layout from '@/views/layout/index.vue'
+import { message } from 'ant-design-vue'
 
 NProgress.configure({
   showSpinner: false
@@ -10,14 +12,6 @@ const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
-      name: 'Home',
-      meta: {
-        title: 'GinTalk',
-      },
-      component:() => import('@/views/home/index.vue')
-    },
-    {
       path: '/login',
       name: 'Login',
       meta: {
@@ -25,6 +19,41 @@ const router = createRouter({
         requiresAuth: false,
       },
       component:() => import('@/views/login/index.vue')
+    },
+    {
+      path: '/',
+      component: Layout,
+      meta: { refreshToken: true },
+      redirect: '/chat',
+      children: [
+        {
+          path: '/home',
+          name: 'Home',
+          meta: {
+            title: 'GinTalk',
+            requiresAuth: true,
+          },
+          component:() => import('@/views/home/index.vue')
+        },
+        {
+          path: '/chat',
+          name: 'Chat',
+          meta: {
+            title: 'Chat',
+            requiresAuth: true,
+          },
+          component:() => import('@/views/chats/index.vue')
+        },
+        {
+          path: '/relations',
+          name: 'Relations',
+          meta: {
+            title: 'Relations',
+            requiresAuth: true,
+          },
+          component:() => import('@/views/relations/index.vue')
+        }
+      ]
     },
   ],
 })
@@ -40,7 +69,6 @@ router.beforeEach((to,from,next) => {
   if (to.meta.requiresAuth === false) {
     if (to.name === 'Login' && isLoggedIn) {
       next({ name: 'Home' })
-      NProgress.done()
     } else {
       next()
     }
@@ -51,9 +79,9 @@ router.beforeEach((to,from,next) => {
       message.warning('Token has expired, please re-login first...')
       clearAuth()
       next({ name: 'Login' })
-      NProgress.done()
     }
   }
+  NProgress.done()
 })
 
 const isTokenValid = () => {
