@@ -13,6 +13,7 @@ func SetupRouter() *gin.Engine {
 	InitializeSystemRouter(r)
 	InitializeLoginRouter(r)
 	InitializeUserRouter(r)
+	InitializeLogRouter(r)
 
 	return r
 }

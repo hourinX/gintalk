@@ -12,6 +12,15 @@ const (
 	CodeTooManyRequest = 10008 // 请求过于频繁
 )
 
+const (
+	YYYY           = "2006"
+	YYYYMM         = "2006-01"
+	YYYYMMDD       = "2006-01-02"
+	YYYYMMDDHH     = "2006-01-02 15"
+	YYYYMMDDHHMM   = "2006-01-02 15:04"
+	YYYYMMDDHHMMSS = "2006-01-02 15:04:05"
+)
+
 var CodeMap = map[string]int{
 	"success":      CodeSuccess,
 	"fail":         CodeFail,

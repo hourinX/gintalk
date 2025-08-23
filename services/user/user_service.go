@@ -2,10 +2,15 @@ package user
 
 import (
 	"errors"
+	"fmt"
 	"gin-online-chat-backend/commons/utils"
 	"gin-online-chat-backend/daos"
 	"gin-online-chat-backend/models"
+	"gin-online-chat-backend/systems"
+	"time"
 
+	"github.com/gin-gonic/gin"
+	"github.com/mssola/user_agent"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -40,7 +45,7 @@ func UserRegister(model *UserRegisterModel) (string, error) {
 	return code, nil
 }
 
-func UserLogin(model *UserLoginModel) (*ReadUserLoginModel, error) {
+func UserLogin(c *gin.Context, model *UserLoginModel) (*ReadUserLoginModel, error) {
 	if model.UserCode == "" {
 		return nil, errors.New("用户账号不能为空")
 	}
@@ -62,6 +67,26 @@ func UserLogin(model *UserLoginModel) (*ReadUserLoginModel, error) {
 	}
 	refreshToken, _ := utils.GenerateRefreshToken(u.Id)
 
+	ip := c.ClientIP()
+	userAgent := c.Request.UserAgent()
+	ua := user_agent.New(userAgent)
+	browserName, browserVersion := ua.Browser()
+	os := ua.OS()
+	deviceInfo := fmt.Sprintf("%s %s / %s", browserName, browserVersion, os)
+
+	err = daos.InsertLoginLog(nil, &models.LoginLogs{
+		UserId:      u.UserCode,
+		UserName:    u.UserName,
+		LoginTime:   time.Now(),
+		IpAddress:   ip,
+		DeviceInfo:  deviceInfo,
+		LoginStatus: "success",
+		LoginMethod: "password",
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to insert login log: %w", err)
+	}
+
 	data := &ReadUserLoginModel{
 		Id:           u.Id,
 		UserName:     u.UserName,
@@ -74,6 +99,11 @@ func UserLogin(model *UserLoginModel) (*ReadUserLoginModel, error) {
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		ExpireTime:   expireTime,
+	}
+
+	err = systems.Set(fmt.Sprintf("user:%s", u.UserCode), data, 24*time.Hour)
+	if err != nil {
+		return nil, fmt.Errorf("failed to cache user data: %w", err)
 	}
 	return data, nil
 }

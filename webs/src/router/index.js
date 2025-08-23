@@ -52,6 +52,15 @@ const router = createRouter({
             requiresAuth: true,
           },
           component:() => import('@/views/relations/index.vue')
+        },
+        {
+          path: '/logs',
+          name: 'Logs',
+          meta: {
+            title: 'Logs',
+            requiresAuth: true,
+          },
+          component:() => import('@/views/logs/list.vue')
         }
       ]
     },

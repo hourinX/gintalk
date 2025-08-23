@@ -1,13 +1,13 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router'
-import { CommentOutlined, TeamOutlined } from '@ant-design/icons-vue'
+import { message,Modal } from 'ant-design-vue'
+import { CommentOutlined, TeamOutlined, FundProjectionScreenOutlined, LogoutOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
 
 const activeIcon = ref('');
-console.log('Current route name:', route.name)
 if (route.name) {
   activeIcon.value = route.name.toLowerCase() === 'chat' ? 'chats' : route.name.toLowerCase()
 } else {
@@ -15,11 +15,30 @@ if (route.name) {
 }
 
 const icons = [
-  { key: 'chats', component: CommentOutlined, route: '/chat' },
-  { key: 'relations', component: TeamOutlined, route: '/relations' },
+  { key: 'chats', component: CommentOutlined, route: '/chat', title: '聊天' },
+  { key: 'relations', component: TeamOutlined, route: '/relations', title: '联系人' },
+  { key: 'logs', component: FundProjectionScreenOutlined, route: '/logs', title: '日志' },
+  { key: 'logout', component: LogoutOutlined, route: '/logout', title: '退出登录' },
 ]
 
 const handleIconClick = (key,route) => {
+  if (key === 'logout') {
+    Modal.confirm({
+        title: '退出提醒',
+        content: `Are you sure you want to log out？`,
+        okText: 'sure',
+        cancelText: 'cancel',
+        onOk() {
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+          localStorage.removeItem('expires_time')
+          router.push('/login')
+          message.info('have logged out successfully');
+        },
+        onCancel() {},
+    })
+    return
+  }
   activeIcon.value = key
   router.push(route)
 }
@@ -36,33 +55,40 @@ watch(
 </script>
 
 <template>
-  <a-layout>
+  <a-layout class="main-layout">
     <a-layout-header class="header">
       <div class="logo no-select">
         <img src="@/assets/logo.svg" alt="Logo" class="logo-img" />
         <span class="logo-text">GinTalk</span>
       </div>
     </a-layout-header>
-    <a-layout>
+
+    <a-layout class="body-layout">
       <a-layout-sider width="50" class="sider" style="background: #fff">
         <div class="icon-menu">
-          <component
+          <a-tooltip
             v-for="item in icons"
-            :is="item.component"
             :key="item.key"
-            class="menu-icon"
-            :class="{ active: activeIcon === item.key }"
-            @click="handleIconClick(item.key,item.route)"
-          />
+            :title="item.title"
+            placement="rightTop"
+          >
+            <component
+              :is="item.component"
+              :key="item.key"
+              class="menu-icon"
+              :class="{ active: activeIcon === item.key }"
+              @click="handleIconClick(item.key,item.route)"
+            />
+          </a-tooltip>
         </div>
       </a-layout-sider>
-      <a-layout style="padding: 0 12px 12px">
-        <a-layout-content
-          :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }"
-        >
+
+      <a-layout style="padding: 0 2px 2px">
+        <a-layout-content class="content-layout">
           <router-view />
         </a-layout-content>
       </a-layout>
+
     </a-layout>
   </a-layout>
 </template>
@@ -79,6 +105,26 @@ watch(
   align-items: center;
   align-content: center;
   gap: 8px;
+}
+
+.main-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.body-layout {
+  flex: 1;
+  display: flex;
+}
+
+.content-layout {
+  padding: 20px;
+  margin: 0;
+  flex: 1;
+  background: #fff;
+  min-height: 0;
+  overflow: auto;
 }
 
 .no-select {
@@ -123,6 +169,7 @@ watch(
 .sider {
   background: #001529;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   padding: 16px 0;
 }

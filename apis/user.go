@@ -28,7 +28,7 @@ func Login(c *gin.Context) {
 		commons.Fail(c, commons.CodeParamError, "参数错误: "+err.Error())
 		return
 	}
-	data, err := user.UserLogin(&req)
+	data, err := user.UserLogin(c, &req)
 	if err != nil {
 		commons.Fail(c, commons.CodeServerError, err.Error())
 		return
