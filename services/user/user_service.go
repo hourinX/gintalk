@@ -60,7 +60,7 @@ func UserLogin(c *gin.Context, model *UserLoginModel) (*ReadUserLoginModel, erro
 		return nil, err
 	}
 	if err = bcrypt.CompareHashAndPassword([]byte((u).Password), []byte(model.Password)); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("用户名或密码错误,请重试")
 	}
 	accessToken, expireTime, err := utils.GenerateToken(u.Id)
 	if err != nil {

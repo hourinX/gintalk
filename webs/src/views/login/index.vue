@@ -4,6 +4,7 @@ import { UserOutlined, LockOutlined, MailOutlined,PhoneOutlined } from '@ant-des
 import { login,register } from '@/api/login'
 import { message,Modal } from 'ant-design-vue'
 import { useRouter } from 'vue-router';
+import { debounce } from 'lodash'
 
 // 响应式数据
 const isSignUpMode = ref(false)
@@ -11,6 +12,8 @@ const container = ref(null)
 const loading = ref(false)
 const remember = ref(false)
 const router = useRouter();
+const signInPending = ref(false)
+const signUpPending = ref(false)
 
 const signInForm = reactive({
     user_code: '',
@@ -18,7 +21,9 @@ const signInForm = reactive({
     captcha: '',
 })
 
-const handleSignIn = async ()=> {
+const handleSignIn = debounce(async ()=> {
+    if (loading.value) return
+
     if (signInForm.user_code === "") {
         message.warning("请输入用户名")
         return
@@ -33,37 +38,48 @@ const handleSignIn = async ()=> {
     // }
     loading.value = true
     
-    const res = await login(signInForm)
-    loading.value = false
-    if (res.code === 10000 && res.data) {
-      localStorage.setItem('access_token', res.data.access_token);
-      localStorage.setItem('refresh_token', res.data.refresh_token);
-      localStorage.setItem('expire_time', res.data.expire_time);
-      if (remember.value) {
-          const user = {
-            id: res.data.id,
-            user_name: res.data.user_name,
-            user_code: res.data.user_code,
-            avatar: res.data.avatar,
-            phone: res.data.phone,
-            email: res.data.email,
-            gender: res.data.gender,
-            is_frozen: res.data.is_frozen,
-          }
-          localStorage.setItem('user', JSON.stringify(user))
-          localStorage.setItem('remember-account',JSON.stringify({
-              user_code: signInForm.user_code,
-              password: signInForm.password
-          }))
-          router.push({path: '/'})
-      } else {
-          const user = localStorage.getItem('remember-account')
-          console.log('log2',user)
-          if (user) {
-              localStorage.removeItem('remember-account')
-          }
+    try { 
+      const res = await login(signInForm)
+      loading.value = false
+      if (res.code === 10000 && res.data) {
+        localStorage.setItem('access_token', res.data.access_token);
+        localStorage.setItem('refresh_token', res.data.refresh_token);
+        localStorage.setItem('expire_time', res.data.expire_time);
+        if (remember.value) {
+            const user = {
+              id: res.data.id,
+              user_name: res.data.user_name,
+              user_code: res.data.user_code,
+              avatar: res.data.avatar,
+              phone: res.data.phone,
+              email: res.data.email,
+              gender: res.data.gender,
+              is_frozen: res.data.is_frozen,
+            }
+            localStorage.setItem('user', JSON.stringify(user))
+            localStorage.setItem('remember-account',JSON.stringify({
+                user_code: signInForm.user_code,
+                password: signInForm.password
+            }))
+            signInPending.value = false
+            router.push({path: '/'})
+        } else {
+            const user = localStorage.getItem('remember-account')
+            console.log('log2',user)
+            if (user) {
+                localStorage.removeItem('remember-account')
+            }
+        }
       }
+    } catch (error) {} finally {
+      loading.value = false
+      signInPending.value = false
     }
+},300)
+
+const triggerSignIn = () => {
+  signInPending.value = true
+  handleSignIn()
 }
 
 const signUpForm = reactive({
@@ -92,7 +108,7 @@ const switchToSignIn = () => {
 }
 
 // handle to register account
-const handleSignUp = async () => {
+const handleSignUp = debounce(async () => {
   if (signUpForm.username === "") {
     message.warning("请输入用户名")
     return
@@ -111,44 +127,54 @@ const handleSignUp = async () => {
   }
 
   loading.value = true
-  const res = await register(signUpForm)
-  loading.value = false
-  if (res.code === 10000) {
-    console.log('res',res)
-    Modal.confirm({
-        title: '注册成功',
-        content: `您的账号已成功注册，登录账号为:${res.data},现在去登录吗？`,
-        okText: '去登录',
-        cancelText: '取消',
-        onOk() {
-          switchToSignIn(); 
-          Object.assign(signInForm, {
-            user_code: '',
-            password: '',
-            captcha: ''
-          });
+  try {
+    const res = await register(signUpForm)
+    if (res.code === 10000) {
+      console.log('res',res)
+      Modal.confirm({
+          title: '注册成功',
+          content: `您的账号已成功注册，登录账号为:${res.data},现在去登录吗？`,
+          okText: '去登录',
+          cancelText: '取消',
+          onOk() {
+            switchToSignIn(); 
+            Object.assign(signInForm, {
+              user_code: '',
+              password: '',
+              captcha: ''
+            });
 
-          Object.assign(signUpForm, {
-            username: '',
-            password: '',
-            email: '',
-            phone: '',
-            gender: 1
-          });
-          message.info('已为您切换至登录页面');
-        },
-        onCancel() {
-          message.info('您已取消，请自行选择登录或继续注册');
-          Object.assign(signUpForm, {
-            username: '',
-            password: '',
-            email: '',
-            phone: '',
-            gender: 1
-          });
-        },
-    })
+            Object.assign(signUpForm, {
+              username: '',
+              password: '',
+              email: '',
+              phone: '',
+              gender: 1
+            });
+            message.info('已为您切换至登录页面');
+          },
+          onCancel() {
+            message.info('您已取消，请自行选择登录或继续注册');
+            Object.assign(signUpForm, {
+              username: '',
+              password: '',
+              email: '',
+              phone: '',
+              gender: 1
+            });
+          },
+      })
+    }
+  } catch (error) {} finally {
+    loading.value = false
+    signUpPending.value = false
   }
+  
+},300)
+
+const triggerSignUp = () => {
+  signUpPending.value = true
+  handleSignUp()
 }
 
 // use ripple style
@@ -236,10 +262,17 @@ onMounted(() => {
 
             <a-form-item>
                 <a-button type="primary" :loading="loading" 
-                    @click="handleSignIn" 
-                    @click.native="createRipple" 
-                    class="custom-button"
-                >登录</a-button>
+                  @click="triggerSignIn" 
+                  @click.native="createRipple" 
+                  class="custom-button"
+                >
+                <template v-if="signInPending">
+                  <span class="wave-text">登录中...</span>
+                </template>
+                <template v-else>
+                  登录
+                </template>
+                </a-button>
             </a-form-item>
           
           </div>
@@ -294,10 +327,17 @@ onMounted(() => {
 
             <a-form-item>
                 <a-button type="primary" :loading="loading" 
-                    @click="handleSignUp" 
-                    @click.native="createRipple" 
-                    class="custom-button"
-                >注册</a-button>
+                  @click="triggerSignUp" 
+                  @click.native="createRipple" 
+                  class="custom-button"
+                >
+                <template v-if="signUpPending">
+                  <span class="wave-text">注册中...</span>
+                </template>
+                <template v-else>
+                  注册
+                </template>
+                </a-button>
             </a-form-item>
           </div>
         </a-form>
@@ -358,6 +398,22 @@ onMounted(() => {
   top: 0;
   height: 100%;
   transition: all 0.6s ease-in-out;
+}
+
+.wave-text {
+  display: inline-block;
+  font-weight: bold;
+  background: linear-gradient(270deg, #ffffff, #ffffff, #ffffff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+  animation: wave 1.5s ease-in-out infinite;
+}
+
+@keyframes wave {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .sign-in-container {

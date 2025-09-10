@@ -7,17 +7,17 @@ WORKDIR /app
 # 安装必要的包
 RUN apk add --no-cache git
 
-# 复制 go mod 文件
+# 复制 go mod 文件（先只复制这些文件以利用Docker层缓存）
 COPY go.mod go.sum ./
 
-# 下载依赖
-RUN go mod download
+# 下载依赖（这一步会缓存，除非go.mod或go.sum发生变化）
+RUN go mod download && go mod verify
 
 # 复制源代码
 COPY . .
 
-# 构建应用
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+# 构建应用（添加优化参数）
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-w -s" -o main .
 
 # 使用轻量级的 alpine 镜像作为运行环境
 FROM alpine:latest
@@ -39,4 +39,3 @@ EXPOSE 8080
 
 # 运行应用
 CMD ["./main"]
-
