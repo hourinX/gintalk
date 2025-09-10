@@ -24,3 +24,13 @@ type UserWhere struct {
 	Phone    string `json:"phone"`
 	Email    string `json:"email"`
 }
+
+type UserGroup struct {
+	Id         string    `json:"id"`
+	UserId     string    `json:"user_id"`
+	GroupName  string    `json:"group_name"`
+	Type       int       `json:"type"`
+	Editable   int       `json:"editable"`
+	CreateTime time.Time `json:"create_time"`
+	UpdateTime time.Time `json:"update_time"`
+}

@@ -25,13 +25,13 @@ const handleIconClick = (key,route) => {
   if (key === 'logout') {
     Modal.confirm({
         title: '退出提醒',
-        content: `Are you sure you want to log out？`,
-        okText: 'sure',
-        cancelText: 'cancel',
+        content: `是否确定登出当前系统？`,
+        okText: '登出',
+        cancelText: '取消',
         onOk() {
           localStorage.removeItem('access_token')
           localStorage.removeItem('refresh_token')
-          localStorage.removeItem('expires_time')
+          localStorage.removeItem('expire_time')
           router.push('/login')
           message.info('have logged out successfully');
         },

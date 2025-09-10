@@ -40,3 +40,14 @@ const (
 const (
 	StatusUp = 1 // 状态正常
 )
+
+const (
+	GroupTypeSystem  = 0 //系统分组
+	GroupTypeDefault = 1 //默认分组
+	GroupTypeCustom  = 2 //自定义分组
+)
+
+const (
+	EditableNotPermission = 0 //不可修改
+	EditablePermission    = 1 //可修改
+)

@@ -40,11 +40,21 @@ const handleSignIn = async ()=> {
       localStorage.setItem('refresh_token', res.data.refresh_token);
       localStorage.setItem('expire_time', res.data.expire_time);
       if (remember.value) {
+          const user = {
+            id: res.data.id,
+            user_name: res.data.user_name,
+            user_code: res.data.user_code,
+            avatar: res.data.avatar,
+            phone: res.data.phone,
+            email: res.data.email,
+            gender: res.data.gender,
+            is_frozen: res.data.is_frozen,
+          }
+          localStorage.setItem('user', JSON.stringify(user))
           localStorage.setItem('remember-account',JSON.stringify({
               user_code: signInForm.user_code,
               password: signInForm.password
           }))
-          // TODO: navigate to homePage
           router.push({path: '/'})
       } else {
           const user = localStorage.getItem('remember-account')
