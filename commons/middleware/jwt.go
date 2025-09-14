@@ -3,6 +3,7 @@ package middleware
 import (
 	"gin-online-chat-backend/systems"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,8 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+
+		tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
 
 		jwtScrect := []byte(systems.GetConfig().JWT.Secret)
 		issuer := systems.GetConfig().JWT.Issuer

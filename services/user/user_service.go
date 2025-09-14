@@ -82,10 +82,10 @@ func UserLogin(c *gin.Context, model *UserLoginModel) (*ReadUserLoginModel, erro
 		IpAddress:   ip,
 		DeviceInfo:  deviceInfo,
 		LoginStatus: "success",
-		LoginMethod: "password",
+		LoginMethod: "账密登录",
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to insert login log: %w", err)
+		return nil, fmt.Errorf("新增登录日志失败: %w", err)
 	}
 
 	data := &ReadUserLoginModel{
@@ -104,7 +104,7 @@ func UserLogin(c *gin.Context, model *UserLoginModel) (*ReadUserLoginModel, erro
 
 	err = systems.Set(fmt.Sprintf("user:%s", u.UserCode), data, 24*time.Hour)
 	if err != nil {
-		return nil, fmt.Errorf("failed to cache user data: %w", err)
+		return nil, fmt.Errorf("缓存用户信息失败: %w", err)
 	}
 	return data, nil
 }

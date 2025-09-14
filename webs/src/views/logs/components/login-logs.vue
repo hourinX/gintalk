@@ -4,6 +4,18 @@ import { getLoginLogList } from '@/api/log';
 
 const columns = [
     {
+        title: '序号',
+        key: 'id',
+        customRender: ({ index }) => {
+          return (pagination.page_no - 1) * pagination.page_size + index + 1;
+        },
+    },
+    {
+        title: '用户ID',
+        dataIndex: 'user_id',
+        key: 'user_id',
+    },
+    {
         title: '用户名',
         dataIndex: 'user_name',
         key: 'user_name',
@@ -56,12 +68,19 @@ const getLoginLogData = async(type) => {
     page_size: pagination.page_size,
   };
   loading.value = true;
-  const res = await getLoginLogList(params);
-  loading.value = false;
-  if (res.code === 10000) {
-    dataSource.value = res.data.list;
-    pagination.total = res.data.count;
+  try{
+    const res = await getLoginLogList(params);
+    loading.value = false;
+    if (res.code === 10000) {
+      dataSource.value = res.data.list;
+      pagination.total = res.data.count;
+    }
+  } catch(err){ 
+    loading.value = false;
+  } finally{
+    loading.value = false;
   }
+  
 };
 
 const handleTableChange = (pag) => {
@@ -77,8 +96,7 @@ onMounted(() => {
 watch(
   () => query.type,
   (newValue) => {
-    console.log(`Query type changed to: ${newValue}`);
-    pagination.current = 1;
+    pagination.page_no = 1;
     getLoginLogData(newValue);
   }
 );
@@ -96,24 +114,16 @@ watch(
                     <a-radio-button :value="3">本年度</a-radio-button>
                 </a-radio-group>
             </a-form-item>
-
-            <!-- <a-form-item label="">
-
-            </a-form-item> -->
         </a-row>
     </a-form>
 
     <a-table :columns="columns" :data-source="dataSource" :row-key="record => record.id" :pagination="pagination" :loading="loading" @change="handleTableChange">
-        
-        
-
     </a-table>
   </div>
 </template>
 
 <style scoped>
 .list-v {
-  /* padding: 20px; */
   background-color: #fff;
   height: auto;
 }
