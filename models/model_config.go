@@ -23,6 +23,14 @@ type ModelRedisConfig struct {
 	DB       int
 }
 
+type ModelRabbitMqConfig struct {
+	Host     string
+	Port     int
+	User     string
+	Password string
+	VHost    string
+}
+
 type ModelJwtConfig struct {
 	Secret      string
 	Issuer      string
@@ -50,6 +58,7 @@ type Config struct {
 	Server        ModelHostConfig
 	MySQL         ModelMysqlConfig
 	Redis         ModelRedisConfig
+	RabbitMQ      ModelRabbitMqConfig
 	JWT           ModelJwtConfig
 	Elasticsearch ModelElasticsearchConfig
 	Captcha       ModelCaptchaConfig

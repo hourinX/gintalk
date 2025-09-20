@@ -25,6 +25,11 @@ func main() {
 	}
 	defer systems.CloseRedis()
 
+	if err := systems.InitRabbitMQ(); err != nil {
+		log.Fatalf("RabbitMQ 初始化失败: %v", err)
+	}
+	defer systems.CloseRabbitMQ()
+
 	if err := systems.InitElasticsearch(); err != nil {
 		log.Fatalf("ElasticSearch初始化失败: %v", err)
 	} else {

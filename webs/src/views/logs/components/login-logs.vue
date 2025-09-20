@@ -1,6 +1,7 @@
 <script setup>
 import { ref, reactive, watch, onMounted } from 'vue';
 import { getLoginLogList } from '@/api/log';
+import { message } from 'ant-design-vue';
 
 const columns = [
     {
@@ -98,6 +99,7 @@ watch(
   (newValue) => {
     pagination.page_no = 1;
     getLoginLogData(newValue);
+    message.success('查询成功');
   }
 );
 </script>

@@ -25,6 +25,13 @@ redis:
   password: ""
   db: 0
 
+RabbitMQ:
+  Host: "127.0.0.1"
+  Port: 5672
+  User: "guest"
+  Password: "guest"
+  VHost: "/"
+
 elasticsearch:
   url: "http://127.0.0.1:9200"
   username: ""
