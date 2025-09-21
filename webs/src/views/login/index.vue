@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, getCurrentInstance  } from 'vue'
 import { UserOutlined, LockOutlined, MailOutlined,PhoneOutlined } from '@ant-design/icons-vue'
 import { login,register } from '@/api/login'
 import { message,Modal } from 'ant-design-vue'
@@ -14,6 +14,7 @@ const remember = ref(false)
 const router = useRouter();
 const signInPending = ref(false)
 const signUpPending = ref(false)
+const { proxy } = getCurrentInstance()
 
 const signInForm = reactive({
     user_code: '',
@@ -26,10 +27,12 @@ const handleSignIn = debounce(async ()=> {
 
     if (signInForm.user_code === "") {
         message.warning("请输入用户名")
+        signInPending.value = false
         return
     }
     if (signInForm.password === "") {
         message.warning('请输入密码')
+        signInPending.value = false
         return
     }
     // if (signInForm.captcha === "") {
@@ -78,6 +81,7 @@ const handleSignIn = debounce(async ()=> {
 },300)
 
 const triggerSignIn = () => {
+  proxy.$playSound()
   signInPending.value = true
   handleSignIn()
 }
@@ -92,18 +96,20 @@ const signUpForm = reactive({
 
 // switch to register
 const switchToSignUp = () => {
-    Object.assign(signUpForm, {
-        username: '',
-        password: '',
-        email: '',
-        phone: '',
-        gender: 1
-    });
-    isSignUpMode.value = true
+  proxy.$playSound()
+  Object.assign(signUpForm, {
+      username: '',
+      password: '',
+      email: '',
+      phone: '',
+      gender: 1
+  });
+  isSignUpMode.value = true
 }
 
 // switch to login
 const switchToSignIn = () => {
+  proxy.$playSound()
   isSignUpMode.value = false
 }
 
@@ -111,18 +117,22 @@ const switchToSignIn = () => {
 const handleSignUp = debounce(async () => {
   if (signUpForm.username === "") {
     message.warning("请输入用户名")
+    signUpPending.value = false
     return
   }
   if (signUpForm.password === "") {
     message.warning('请输入密码')
+    signUpPending.value = false
     return
   }
   if (signUpForm.phone === "") {
     message.warning('请输入手机号')
+    signUpPending.value = false
     return
   }
   if (signUpForm.email === "") {
     message.warning("请输入邮箱")
+    signUpPending.value = false
     return
   }
 
@@ -173,6 +183,7 @@ const handleSignUp = debounce(async () => {
 },300)
 
 const triggerSignUp = () => {
+  proxy.$playSound()
   signUpPending.value = true
   handleSignUp()
 }
