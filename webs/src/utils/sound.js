@@ -2,6 +2,9 @@ const allSound = [
     "wow.mp3",
     "manbo.wav",
     "aminuosi.m4a",
+    "oye.mp3",
+    "siren.mp3",
+    "duang.m4a",
 ]
 
 export function playSound() {

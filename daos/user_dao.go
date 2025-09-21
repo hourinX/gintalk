@@ -6,8 +6,6 @@ import (
 	"gin-online-chat-backend/models"
 	"gin-online-chat-backend/systems"
 	"time"
-
-	"gorm.io/gorm"
 )
 
 func RegisterUser(user *models.User) (string, error) {
@@ -34,19 +32,4 @@ func GetUserByCondition(w *models.UserWhere, field string) (*models.User, error)
 	where, args := parseUserWhere(w)
 	err := systems.DB.Table(commons.TableImUser).Select(field).Where(where, args...).First(&user).Error
 	return &user, err
-}
-
-func InsertUserGroup(tx *gorm.DB, group *models.UserGroup) error {
-	if tx == nil {
-		tx = systems.DB
-	}
-	id, err := utils.GenerateNumericID(commons.MaxIDLength)
-	if err != nil {
-		return err
-	}
-	curTime := time.Now()
-	group.Id = id
-	group.CreateTime = curTime
-	group.UpdateTime = curTime
-	return tx.Table(commons.TableImUserGroups).Create(group).Error
 }
