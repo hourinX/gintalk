@@ -1,7 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
-import Layout from '@/views/layout/index.vue'
+import Layout from '@/layout/index.vue'
 import { message } from 'ant-design-vue'
 
 NProgress.configure({
