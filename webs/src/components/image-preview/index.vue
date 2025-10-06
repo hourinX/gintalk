@@ -9,7 +9,7 @@ const props = defineProps({
 const emit = defineEmits(['update:visible'])
 
 const scale = ref(1)
-const cursorStyle = ref('default') // 初始指针样式
+const cursorStyle = ref('default')
 
 watch(() => props.visible, (val) => {
   if (!val) {
@@ -34,8 +34,6 @@ const handleWheel = (e) => {
   }
 }
 
-const imgWidth = ref(0)
-const imgHeight = ref(0)
 const isMouseOutside = ref(false)
 
 const handleMouseEnter = () => {
@@ -74,6 +72,7 @@ const imgStyle = computed(() => ({
       @mouseleave="handleMouseLeave"
     />
     <div v-if="isMouseOutside" class="close-tip">点击任意位置关闭图片</div>
+    <div v-else class="tip-text">滚动鼠标可放大/缩小图片</div>
   </div>
 </template>
 
@@ -86,7 +85,7 @@ const imgStyle = computed(() => ({
   justify-content: center;
   align-items: center;
   z-index: 2000;
-  cursor: pointer; /* 背景显示可点击关闭 */
+  cursor: pointer;
 }
 
 .close-tip {
@@ -96,6 +95,16 @@ const imgStyle = computed(() => ({
   text-align: center;
   color: rgba(255, 255, 255, 0.8);
   font-size: 14px;
-  pointer-events: none; /* 不阻挡点击事件 */
+  pointer-events: none;
+}
+
+.tip-text {
+  position: absolute;
+  bottom: 30px;
+  width: 100%;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  pointer-events: none;
 }
 </style>
