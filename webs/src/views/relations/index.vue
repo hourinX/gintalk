@@ -1,5 +1,7 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+import GroupInfo from './components/group-info.vue'
+import userInfo from './components/user-info.vue'
 
 // 模拟联系人数据
 const contacts = ref([
@@ -55,30 +57,69 @@ const contacts = ref([
   { id: 50, name: 'Yosef', phone: '515151515', email: 'yosef@example.com', avatar: 'https://i.pravatar.cc/40?img=51', usercode: '513456789' },
 ])
 
+const groups = ref([
+  { id: 1, name: '前端学习群', members: 120, avatar: 'https://i.pravatar.cc/40?img=31' },
+  { id: 2, name: 'Vue3 开发者', members: 85, avatar: 'https://i.pravatar.cc/40?img=32' },
+  { id: 3, name: 'React 技术群', members: 200, avatar: 'https://i.pravatar.cc/40?img=33' },
+  { id: 4, name: 'Go 语言交流群', members: 150, avatar: 'https://i.pravatar.cc/40?img=34' },
+  { id: 5, name: 'Java 后端群', members: 98, avatar: 'https://i.pravatar.cc/40?img=35' },
+  { id: 6, name: 'Python 爱好者', members: 240, avatar: 'https://i.pravatar.cc/40?img=36' },
+  { id: 7, name: 'AI 技术分享', members: 300, avatar: 'https://i.pravatar.cc/40?img=37' },
+  { id: 8, name: '大数据交流群', members: 176, avatar: 'https://i.pravatar.cc/40?img=38' },
+  { id: 9, name: '算法研究群', members: 132, avatar: 'https://i.pravatar.cc/40?img=39' },
+  { id: 10, name: '测试工程师群', members: 67, avatar: 'https://i.pravatar.cc/40?img=40' },
+  { id: 11, name: 'UI/UX 设计群', members: 89, avatar: 'https://i.pravatar.cc/40?img=41' },
+  { id: 12, name: '数据库交流群', members: 178, avatar: 'https://i.pravatar.cc/40?img=42' },
+  { id: 13, name: 'Linux 运维群', members: 201, avatar: 'https://i.pravatar.cc/40?img=43' },
+  { id: 14, name: '网络安全群', members: 142, avatar: 'https://i.pravatar.cc/40?img=44' },
+  { id: 15, name: '全栈开发群', members: 110, avatar: 'https://i.pravatar.cc/40?img=45' },
+  { id: 16, name: '创业交流', members: 90, avatar: 'https://i.pravatar.cc/40?img=46' },
+  { id: 17, name: '机器学习群', members: 256, avatar: 'https://i.pravatar.cc/40?img=47' },
+  { id: 18, name: '深度学习群', members: 220, avatar: 'https://i.pravatar.cc/40?img=48' },
+  { id: 19, name: '区块链交流群', members: 134, avatar: 'https://i.pravatar.cc/40?img=49' },
+  { id: 20, name: 'Rust 开发者', members: 88, avatar: 'https://i.pravatar.cc/40?img=50' },
+  { id: 21, name: 'C++ 开发群', members: 177, avatar: 'https://i.pravatar.cc/40?img=51' },
+  { id: 22, name: '算法比赛群', members: 199, avatar: 'https://i.pravatar.cc/40?img=52' },
+  { id: 23, name: '开源项目群', members: 144, avatar: 'https://i.pravatar.cc/40?img=53' },
+  { id: 24, name: '自由职业群', members: 76, avatar: 'https://i.pravatar.cc/40?img=54' },
+  { id: 25, name: '远程工作群', members: 112, avatar: 'https://i.pravatar.cc/40?img=55' },
+  { id: 26, name: '软件架构群', members: 168, avatar: 'https://i.pravatar.cc/40?img=56' },
+  { id: 27, name: '程序人生', members: 300, avatar: 'https://i.pravatar.cc/40?img=57' },
+  { id: 28, name: '技术面试群', members: 140, avatar: 'https://i.pravatar.cc/40?img=58' },
+  { id: 29, name: '运维自动化', members: 121, avatar: 'https://i.pravatar.cc/40?img=59' },
+  { id: 30, name: '职业发展群', members: 102, avatar: 'https://i.pravatar.cc/40?img=60' }
+])
+
 
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
-
 const selectedFriend = ref(null)
-
+const selectedGroup = ref(null)
 const showContacts = ref(true)
+const showGroups = ref(false)
+const selectedLetter = ref(null)
+const searchQuery = ref('')
 
 const selectFriend = (friend) => {
   selectedFriend.value = friend
+  selectedGroup.value = null
+}
+
+const selectGroup = (group) => {
+  selectedGroup.value = group
+  selectedFriend.value = null
 }
 
 const toggleContacts = () => {
   showContacts.value = !showContacts.value
 }
 
-const showGroups = ref(false)
 
 const toggleGroups = () => {
   showGroups.value = !showGroups.value
 }
 
-const selectedLetter = ref(null)
-
 const selectLetter = (letter) => {
+  showContacts.value = true
   if (selectedLetter.value === letter) {
     selectedLetter.value = null
   } else {
@@ -104,7 +145,11 @@ const filteredContacts = computed(() => {
   return result
 })
 
-const searchQuery = ref('')
+watch(searchQuery, (newVal) => {
+  if (newVal.trim()) {
+    showContacts.value = true
+  }
+})
 
 
 </script>
@@ -126,9 +171,23 @@ const searchQuery = ref('')
             <span>群组</span>
             <span>{{ showGroups ? '▲' : '▼' }}</span>
           </div>
-          <div v-if="showGroups" class="groups-content">
-            <p>这里以后放群组列表</p>
-          </div>
+
+          <a-collapse>
+            <div v-if="showGroups" class="contacts-list">
+              <a-list :data-source="groups">
+                <template #renderItem="{ item }">
+                  <a-list-item
+                    class="contact-item"
+                    @click="selectGroup(item)"
+                    :class="{ active: selectedGroup && selectedGroup.id === item.id }"
+                  >
+                      <a-avatar shape="square" size="large" :src="item.avatar" style="margin-right: 10px" />
+                    {{ item.name }}
+                  </a-list-item>
+                </template>
+              </a-list>
+            </div>
+          </a-collapse>
         </a-card>
       </div>
 
@@ -139,20 +198,22 @@ const searchQuery = ref('')
             <span>{{ showContacts ? '▲' : '▼' }}</span>
           </div>
 
-          <div v-if="showContacts" class="contacts-list">
-            <a-list :data-source="filteredContacts">
-              <template #renderItem="{ item }">
-                <a-list-item
-                  class="contact-item"
-                  @click="selectFriend(item)"
-                  :class="{ active: selectedFriend && selectedFriend.id === item.id }"
-                >
-                    <a-avatar shape="square" size="large" :src="item.avatar" style="margin-right: 10px" />
-                  {{ item.name }}
-                </a-list-item>
-              </template>
-            </a-list>
-          </div>
+          <a-collapse>
+            <div v-if="showContacts" class="contacts-list">
+              <a-list :data-source="filteredContacts">
+                <template #renderItem="{ item }">
+                  <a-list-item
+                    class="contact-item"
+                    @click="selectFriend(item)"
+                    :class="{ active: selectedFriend && selectedFriend.id === item.id }"
+                  >
+                      <a-avatar shape="square" size="large" :src="item.avatar" style="margin-right: 10px" />
+                    {{ item.name }}
+                  </a-list-item>
+                </template>
+              </a-list>
+            </div>
+          </a-collapse>
         </a-card>
       </div>
     </a-layout-sider>
@@ -171,13 +232,20 @@ const searchQuery = ref('')
       </div>
 
       <a-card v-if="selectedFriend" title="好友信息" bordered>
-        <p><b>姓名：</b>{{ selectedFriend.name }}</p>
-        <p><b>电话：</b>{{ selectedFriend.phone }}</p>
-        <p><b>Email：</b>{{ selectedFriend.email }}</p>
+        <user-info :id="selectedFriend.id"></user-info>
+      </a-card>
+
+      <a-card v-else-if="selectedGroup" title="群组信息" bordered>
+        <group-info :id="selectedGroup.id"></group-info>
       </a-card>
 
       <a-card v-else bordered>
-        <p>请选择一个联系人</p>
+        <div class="content">
+          <div class="placeholder-wrapper">
+            <img src="../../static/img/logo.png" alt="请选择联系人" class="placeholder-img" />
+            <!-- <div class="placeholder-text">信息为空</div> -->
+          </div>
+        </div>
       </a-card>
     </a-layout-content>
   </a-layout>
@@ -196,6 +264,9 @@ const searchQuery = ref('')
   flex-direction: column;
   height: 88vh;
   box-sizing: border-box;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .relations-groups,
@@ -209,6 +280,15 @@ const searchQuery = ref('')
 
 .relations-contacts .contacts-list {
   max-height: 73vh; 
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  background: #fff;
+  padding: 0;
+  flex: 1;
+}
+
+.relations-groups .contacts-list {
   overflow-y: auto;
   background: #fff;
   padding: 0;
@@ -241,6 +321,8 @@ const searchQuery = ref('')
 .contacts-list {
   max-height: 400px;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .contact-item {
@@ -299,5 +381,36 @@ const searchQuery = ref('')
 
 .search {
   margin: 10px 0 10px 0;
+}
+
+.content {
+  width: 100%;
+  height: 74vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.placeholder-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.placeholder-img {
+  max-width: 200px;
+  max-height: 200px;
+  object-fit: contain;
+  filter: grayscale(100%);
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.placeholder-text {
+  margin-top: 10px;
+  color: #999;
+  font-size: 14px;
 }
 </style>
