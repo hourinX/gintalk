@@ -15,3 +15,11 @@ export function login(data) {
         data: data
     })
 }
+
+export function getPublicKey(params) {
+    return request({
+        url: '/auth/cryptoPk',
+        method: 'get',
+        params: params
+    })
+}

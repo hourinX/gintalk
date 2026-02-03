@@ -9,6 +9,7 @@ import (
 func InitializeLoginRouter(r *gin.Engine) {
 	loginGroup := r.Group("/auth")
 	{
+		loginGroup.GET("/cryptoPk", apis.CryptoPk)
 		loginGroup.POST("/login", apis.Login)
 		loginGroup.POST("/register", apis.Register)
 		loginGroup.POST("/captcha", apis.Captcha)

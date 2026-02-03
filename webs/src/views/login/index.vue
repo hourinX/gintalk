@@ -1,10 +1,11 @@
 <script setup>
 import { ref, reactive, onMounted, getCurrentInstance  } from 'vue'
 import { UserOutlined, LockOutlined, MailOutlined,PhoneOutlined } from '@ant-design/icons-vue'
-import { login,register } from '@/api/login'
+import CryptoJS from "crypto-js";
+import { login,register,getPublicKey } from '@/api/login'
 import { message,Modal } from 'ant-design-vue'
 import { useRouter } from 'vue-router';
-import { debounce } from 'lodash'
+import { debounce, keyBy } from 'lodash'
 
 // 响应式数据
 const isSignUpMode = ref(false)
@@ -15,6 +16,8 @@ const router = useRouter();
 const signInPending = ref(false)
 const signUpPending = ref(false)
 const { proxy } = getCurrentInstance()
+const aesKey = ref('')
+const plainAesKey = ref('')
 
 const signInForm = reactive({
     user_code: '',
@@ -39,10 +42,30 @@ const handleSignIn = debounce(async ()=> {
     //     message.warning('请输入验证码')
     //     return
     // }
+    
+    // encrypt password
+    const keyBytes = CryptoJS.enc.Base64.parse(plainAesKey.value);
+    const ivHex = keyBytes.toString(CryptoJS.enc.Hex).substr(0, 32);
+    const ivBytes = CryptoJS.enc.Hex.parse(ivHex);
+    const cipherPassword = CryptoJS.AES.encrypt(
+      signInForm.password,
+      keyBytes,
+      {
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7,
+        iv: ivBytes
+      }
+    ).toString();
     loading.value = true
     
     try { 
-      const res = await login(signInForm)
+      let loginData = {
+        user_code: signInForm.user_code,
+        password: cipherPassword,
+        captcha: signInForm.captcha,
+        aes_key: aesKey.value,
+      }
+      const res = await login(loginData)
       loading.value = false
       if (res.code === 10000 && res.data) {
         localStorage.setItem('access_token', res.data.access_token);
@@ -235,6 +258,14 @@ onMounted(() => {
     signInForm.user_code = user.user_code
     signInForm.password = user.password
   }
+
+  getPublicKey({}).then((res) => {
+    if (res.code === 10000 && res.data) {
+      plainAesKey.value = res.data.plainAesKey
+      aesKey.value = res.data.aesKey
+    }
+  })
+  
 })
 </script>
 
