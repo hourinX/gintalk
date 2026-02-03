@@ -54,6 +54,13 @@ type ModelRateLimitConfig struct {
 	IPBlockMinutes        int
 }
 
+type ModelSecurityConfig struct {
+	IpRegisterLimit  int
+	IpRegisterWindow int
+	IpBlockDuration  int
+	CaptchaExpire    int
+}
+
 type Config struct {
 	Server        ModelHostConfig
 	MySQL         ModelMysqlConfig
@@ -63,4 +70,5 @@ type Config struct {
 	Elasticsearch ModelElasticsearchConfig
 	Captcha       ModelCaptchaConfig
 	RateLimit     ModelRateLimitConfig
+	Security      ModelSecurityConfig
 }

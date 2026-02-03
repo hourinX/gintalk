@@ -39,6 +39,9 @@ func main() {
 		//	log.Fatalf("Warning: Failed to create user index: %v", err)
 		//}
 	}
+	if err := systems.InitRSA(); err != nil {
+		log.Fatalf("RSA密钥生成失败: %v", err)
+	}
 
 	r := router.SetupRouter()
 	config := systems.GetConfig()

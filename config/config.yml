@@ -56,4 +56,3 @@ security:
   ipRegisterWindow: 60  # seconds
   ipBlockDuration: 86400  # seconds (24 hours)
   captchaExpire: 300  # seconds (5 minutes)
-
