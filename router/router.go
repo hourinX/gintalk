@@ -7,7 +7,11 @@ import (
 )
 
 func SetupRouter() *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
+	// r := gin.New()
+	// r.Use(gin.Recovery())
+	// r.Use(logger.RequestLogger())
 	r.Use(commons.Cors())
 
 	InitializeSystemRouter(r)

@@ -11,6 +11,8 @@ import (
 )
 
 func main() {
+	// logger.InitZap()
+
 	if err := systems.LoadConfig("config/config.yml"); err != nil {
 		log.Fatalf("配置文件加载失败: %v", err)
 	}

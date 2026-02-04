@@ -311,7 +311,7 @@ onMounted(() => {
             </a-form-item>
 
             <a-form-item>
-              <a-input v-model:value="signInForm.captcha" placeholder="请输入验证码" size="large" maxlength="6" class="input-v">
+              <a-input v-model:value="signInForm.captcha" placeholder="请输入验证码" size="large" :maxlength="6" class="input-v">
                 <template #prefix>
                   <SafetyCertificateOutlined style="margin-right: 0.5rem;margin-left: 0.5rem;" />
                 </template>
