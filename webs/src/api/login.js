@@ -1,5 +1,6 @@
 import request from '@/utils/request'
 
+// register user
 export function register(data) {
     return request({
         url: '/auth/register',
@@ -8,6 +9,7 @@ export function register(data) {
     })
 }
 
+// user login
 export function login(data) {
     return request({
         url: '/auth/login',
@@ -16,6 +18,16 @@ export function login(data) {
     })
 }
 
+// get login captcha
+export function captcha(params) {
+    return request({
+        url: '/auth/captcha',
+        method: 'get',
+        params: params
+    })
+}
+
+// get login aeskey
 export function getPublicKey(params) {
     return request({
         url: '/auth/cryptoPk',

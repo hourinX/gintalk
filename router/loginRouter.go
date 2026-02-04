@@ -12,6 +12,6 @@ func InitializeLoginRouter(r *gin.Engine) {
 		loginGroup.GET("/cryptoPk", apis.CryptoPk)
 		loginGroup.POST("/login", apis.Login)
 		loginGroup.POST("/register", apis.Register)
-		loginGroup.POST("/captcha", apis.Captcha)
+		loginGroup.GET("/captcha", apis.Captcha)
 	}
 }

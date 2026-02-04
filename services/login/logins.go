@@ -5,6 +5,7 @@ type UserLoginModel struct {
 	Password        string `json:"password" validate:"required"`
 	Captcha         string `json:"captcha"`
 	EncryptedAESKey string `json:"aes_key" validate:"required"`
+	CaptchaId       string `json:"captcha_id"`
 }
 
 type UserRegisterModel struct {
@@ -36,4 +37,12 @@ type ReadPublicRsaKeyModel struct {
 	PublicKey   string `json:"publicKey"`
 	AesKey      string `json:"aesKey"`
 	PlainAesKey string `json:"plainAesKey"`
+}
+
+type CaptchaModel struct {
+}
+
+type ReadCaptchaModel struct {
+	Id          string `json:"id"`
+	Base64Image string `json:"base64_image"`
 }

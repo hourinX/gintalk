@@ -19,7 +19,7 @@ func CryptoPk(c *gin.Context) {
 		commons.Fail(c, commons.CodeServerError, err.Error())
 		return
 	}
-	commons.Success(c, "登录成功", data)
+	commons.Success(c, "操作成功", data)
 }
 
 func Login(c *gin.Context) {
@@ -51,6 +51,15 @@ func Register(c *gin.Context) {
 }
 
 func Captcha(c *gin.Context) {
-	//data := user.UserCaptcha()
-
+	var req login.CaptchaModel
+	if err := utils.BindQueryStrict(c, &req); err != nil {
+		commons.Fail(c, commons.CodeParamError, "参数错误: "+err.Error())
+		return
+	}
+	data, err := login.UserCaptcha(c)
+	if err != nil {
+		commons.Fail(c, commons.CodeServerError, err.Error())
+		return
+	}
+	commons.Success(c, "操作成功", data)
 }

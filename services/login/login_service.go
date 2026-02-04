@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mojocn/base64Captcha"
 	"github.com/mssola/user_agent"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -25,6 +26,22 @@ func UserLogin(c *gin.Context, model *UserLoginModel) (*ReadUserLoginModel, erro
 	}
 	if model.Password == "" {
 		return nil, errors.New("密码不能为空")
+	}
+	if model.Captcha == "" {
+		return nil, errors.New("验证码不能为空")
+	}
+
+	var captchaAsw string
+	err := redis.Get(fmt.Sprintf("captcha_%s", model.CaptchaId), &captchaAsw)
+	if err != nil {
+		return nil, errors.New("验证码已过期或不存在")
+	}
+	if model.Captcha != captchaAsw {
+		return nil, errors.New("验证码校验失败")
+	}
+	err = redis.Delete(fmt.Sprintf("captcha_%s", model.CaptchaId))
+	if err != nil {
+		return nil, fmt.Errorf("删除验证码缓存失败: %w", err)
 	}
 
 	rsaCipherAESKey, err := base64.StdEncoding.DecodeString(model.EncryptedAESKey)
@@ -131,8 +148,20 @@ func UserRegister(model *UserRegisterModel) (string, error) {
 	return code, nil
 }
 
-func UserCaptcha() (string, error) {
-	return "", nil
+func UserCaptcha(c *gin.Context) (*ReadCaptchaModel, error) {
+	driver := base64Captcha.NewDriverDigit(80, 240, 6, 0.7, 80)
+	dms := base64Captcha.DefaultMemStore
+	captcha := base64Captcha.NewCaptcha(driver, dms)
+	id, base64s, asw, err := captcha.Generate()
+	if err != nil {
+		return nil, errors.New("生成验证码失败," + err.Error())
+	}
+	result := &ReadCaptchaModel{
+		Id:          id,
+		Base64Image: base64s,
+	}
+	redis.Set(fmt.Sprintf("captcha_%s", id), asw, 2*time.Minute)
+	return result, nil
 }
 
 func GetPublicKey(c *gin.Context, model *PublicKeyModel) (*ReadPublicRsaKeyModel, error) {

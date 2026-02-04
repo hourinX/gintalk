@@ -1,9 +1,9 @@
 <script setup>
 import { ref, reactive, onMounted, getCurrentInstance  } from 'vue'
-import { UserOutlined, LockOutlined, MailOutlined,PhoneOutlined } from '@ant-design/icons-vue'
+import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined, SafetyCertificateOutlined } from '@ant-design/icons-vue'
 import CryptoJS from "crypto-js";
-import { login,register,getPublicKey } from '@/api/login'
-import { message,Modal } from 'ant-design-vue'
+import { login, register, getPublicKey, captcha } from '@/api/login'
+import { message, Modal } from 'ant-design-vue'
 import { useRouter } from 'vue-router';
 import { debounce, keyBy } from 'lodash'
 
@@ -19,88 +19,102 @@ const { proxy } = getCurrentInstance()
 const aesKey = ref('')
 const plainAesKey = ref('')
 
+const captchaForm = reactive({
+  id: '',
+  base64_image: '',
+})
+
+const handleChangeCaptcha = async() => {
+  const res = await captcha({})
+  if (res.code === 10000 && res.data) {
+    captchaForm.id =  res.data.id
+    captchaForm.base64_image = res.data.base64_image
+  }
+}
+
 const signInForm = reactive({
-    user_code: '',
-    password: '',
-    captcha: '',
+  user_code: '',
+  password: '',
+  captcha: '',
 })
 
 const handleSignIn = debounce(async ()=> {
-    if (loading.value) return
+  if (loading.value) return
 
-    if (signInForm.user_code === "") {
-        message.warning("请输入用户名")
-        signInPending.value = false
-        return
-    }
-    if (signInForm.password === "") {
-        message.warning('请输入密码')
-        signInPending.value = false
-        return
-    }
-    // if (signInForm.captcha === "") {
-    //     message.warning('请输入验证码')
-    //     return
-    // }
+  if (signInForm.user_code === "") {
+    message.warning("请输入用户名")
+    signInPending.value = false
+    return
+  }
+  if (signInForm.password === "") {
+    message.warning('请输入密码')
+    signInPending.value = false
+    return
+  }
+  if (signInForm.captcha === "") {
+    message.warning('请输入验证码')
+    signInPending.value = false
+    return
+  }
     
-    // encrypt password
-    const keyBytes = CryptoJS.enc.Base64.parse(plainAesKey.value);
-    const ivHex = keyBytes.toString(CryptoJS.enc.Hex).substr(0, 32);
-    const ivBytes = CryptoJS.enc.Hex.parse(ivHex);
-    const cipherPassword = CryptoJS.AES.encrypt(
-      signInForm.password,
-      keyBytes,
-      {
-        mode: CryptoJS.mode.CBC,
-        padding: CryptoJS.pad.Pkcs7,
-        iv: ivBytes
-      }
-    ).toString();
-    loading.value = true
+  const keyBytes = CryptoJS.enc.Base64.parse(plainAesKey.value);
+  const ivHex = keyBytes.toString(CryptoJS.enc.Hex).substr(0, 32);
+  const ivBytes = CryptoJS.enc.Hex.parse(ivHex);
+  const cipherPassword = CryptoJS.AES.encrypt(
+    signInForm.password,
+    keyBytes,
+    {
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7,
+      iv: ivBytes
+    }
+  ).toString();
+  loading.value = true
     
-    try { 
-      let loginData = {
-        user_code: signInForm.user_code,
-        password: cipherPassword,
-        captcha: signInForm.captcha,
-        aes_key: aesKey.value,
-      }
-      const res = await login(loginData)
-      loading.value = false
-      if (res.code === 10000 && res.data) {
-        localStorage.setItem('access_token', res.data.access_token);
-        localStorage.setItem('refresh_token', res.data.refresh_token);
-        localStorage.setItem('expire_time', res.data.expire_time);
-        if (remember.value) {
-            const user = {
-              id: res.data.id,
-              user_name: res.data.user_name,
-              user_code: res.data.user_code,
-              avatar: res.data.avatar,
-              phone: res.data.phone,
-              email: res.data.email,
-              gender: res.data.gender,
-              is_frozen: res.data.is_frozen,
-            }
-            localStorage.setItem('user', JSON.stringify(user))
-            localStorage.setItem('remember-account',JSON.stringify({
-                user_code: signInForm.user_code,
-                password: signInForm.password
-            }))
-            signInPending.value = false
-            router.push({path: '/'})
-        } else {
-            const user = localStorage.getItem('remember-account')
-            console.log('log2',user)
-            if (user) {
-                localStorage.removeItem('remember-account')
-            }
+  try { 
+    let loginData = {
+      user_code: signInForm.user_code,
+      password: cipherPassword,
+      captcha: signInForm.captcha,
+      aes_key: aesKey.value,
+      captcha_id: captchaForm.id,
+    }
+    const res = await login(loginData)
+    loading.value = false
+    if (res.code === 10000 && res.data) {
+      localStorage.setItem('access_token', res.data.access_token);
+      localStorage.setItem('refresh_token', res.data.refresh_token);
+      localStorage.setItem('expire_time', res.data.expire_time);
+      if (remember.value) {
+        const user = {
+          id: res.data.id,
+          user_name: res.data.user_name,
+          user_code: res.data.user_code,
+          avatar: res.data.avatar,
+          phone: res.data.phone,
+          email: res.data.email,
+          gender: res.data.gender,
+          is_frozen: res.data.is_frozen,
+        }
+        localStorage.setItem('user', JSON.stringify(user))
+        localStorage.setItem('remember-account',JSON.stringify({
+            user_code: signInForm.user_code,
+            password: signInForm.password
+        }))
+        signInPending.value = false
+        router.push({path: '/'})
+      } else {
+        const user = localStorage.getItem('remember-account')
+        console.log('log2',user)
+        if (user) {
+            localStorage.removeItem('remember-account')
         }
       }
-    } catch (error) {} finally {
-      loading.value = false
-      signInPending.value = false
     }
+  } catch (error) {} finally {
+    loading.value = false
+    signInPending.value = false
+  }
 },300)
 
 const triggerSignIn = () => {
@@ -121,11 +135,11 @@ const signUpForm = reactive({
 const switchToSignUp = () => {
   proxy.$playSound()
   Object.assign(signUpForm, {
-      username: '',
-      password: '',
-      email: '',
-      phone: '',
-      gender: 1
+    username: '',
+    password: '',
+    email: '',
+    phone: '',
+    gender: 1
   });
   isSignUpMode.value = true
 }
@@ -165,37 +179,37 @@ const handleSignUp = debounce(async () => {
     if (res.code === 10000) {
       console.log('res',res)
       Modal.confirm({
-          title: '注册成功',
-          content: `您的账号已成功注册，登录账号为:${res.data},现在去登录吗？`,
-          okText: '去登录',
-          cancelText: '取消',
-          onOk() {
-            switchToSignIn(); 
-            Object.assign(signInForm, {
-              user_code: '',
-              password: '',
-              captcha: ''
-            });
+        title: '注册成功',
+        content: `您的账号已成功注册，登录账号为:${res.data},现在去登录吗？`,
+        okText: '去登录',
+        cancelText: '取消',
+        onOk() {
+          switchToSignIn(); 
+          Object.assign(signInForm, {
+            user_code: '',
+            password: '',
+            captcha: ''
+          });
 
-            Object.assign(signUpForm, {
-              username: '',
-              password: '',
-              email: '',
-              phone: '',
-              gender: 1
-            });
-            message.info('已为您切换至登录页面');
-          },
-          onCancel() {
-            message.info('您已取消，请自行选择登录或继续注册');
-            Object.assign(signUpForm, {
-              username: '',
-              password: '',
-              email: '',
-              phone: '',
-              gender: 1
-            });
-          },
+          Object.assign(signUpForm, {
+            username: '',
+            password: '',
+            email: '',
+            phone: '',
+            gender: 1
+          });
+          message.info('已为您切换至登录页面');
+        },
+        onCancel() {
+          message.info('您已取消，请自行选择登录或继续注册');
+          Object.assign(signUpForm, {
+            username: '',
+            password: '',
+            email: '',
+            phone: '',
+            gender: 1
+          });
+        },
       })
     }
   } catch (error) {} finally {
@@ -265,7 +279,8 @@ onMounted(() => {
       aesKey.value = res.data.aesKey
     }
   })
-  
+
+  handleChangeCaptcha()
 })
 </script>
 
@@ -273,48 +288,52 @@ onMounted(() => {
   <div class="login-page">
     <div class="container" :class="{ 'right-panel-active': isSignUpMode }" ref="container">
       
-        <!-- 登录表单 -->
+      <!-- 登录表单 -->
       <div class="form-container sign-in-container">
         <a-form :model="signInForm" class="form">
           <h1 style="font-size: 32px;font-family: 'Courier New', Courier, monospace;">GinTalk Login</h1>
 
           <div>
             <a-form-item>
-                <a-input v-model:value="signInForm.user_code" placeholder="请输入用户名" size="large" class="input-v">
-                    <template #prefix>
-                        <UserOutlined style="margin-right: 0.5rem;margin-left: 0.5rem;" />
-                    </template>
-                </a-input>
+              <a-input v-model:value="signInForm.user_code" placeholder="请输入用户名" size="large" class="input-v">
+                <template #prefix>
+                  <UserOutlined style="margin-right: 0.5rem;margin-left: 0.5rem;" />
+                </template>
+              </a-input>
             </a-form-item>
 
             <a-form-item>
-                <a-input v-model:value="signInForm.password" placeholder="请输入密码" size="large" type="password" class="input-v">
-                    <template #prefix>
-                        <LockOutlined style="margin-right: 0.5rem;margin-left: 0.5rem;" />
-                    </template>
-                </a-input>
+              <a-input v-model:value="signInForm.password" placeholder="请输入密码" size="large" type="password" class="input-v">
+                <template #prefix>
+                  <LockOutlined style="margin-right: 0.5rem;margin-left: 0.5rem;" />
+                </template>
+              </a-input>
+            </a-form-item>
+
+            <a-form-item>
+              <a-input v-model:value="signInForm.captcha" placeholder="请输入验证码" size="large" class="input-v">
+                <template #prefix>
+                  <SafetyCertificateOutlined style="margin-right: 0.5rem;margin-left: 0.5rem;" />
+                </template>
+
+                <template #suffix>
+                  <img :src="captchaForm.base64_image" alt="验证码" style="height: 32px; cursor: pointer;" @click="handleChangeCaptcha" />
+                </template>
+              </a-input>
             </a-form-item>
 
             <a-form-item class="remember-v">
-                <div class="remember-item-v">
-                    <a-checkbox v-model:checked="remember">记住密码</a-checkbox>
-                    <a class="font-v" href="">忘记密码？</a>
-                </div>
+              <div class="remember-item-v">
+                <a-checkbox v-model:checked="remember">记住密码</a-checkbox>
+                <a class="font-v" href="">忘记密码？</a>
+              </div>
             </a-form-item>
 
             <a-form-item>
-                <a-button type="primary" :loading="loading" 
-                  @click="triggerSignIn" 
-                  @click.native="createRipple" 
-                  class="custom-button"
-                >
-                <template v-if="signInPending">
-                  <span class="wave-text">登录中...</span>
-                </template>
-                <template v-else>
-                  登录
-                </template>
-                </a-button>
+              <a-button type="primary" :loading="loading" @click="triggerSignIn" @click.native="createRipple" class="custom-button">
+                <template v-if="signInPending"><span class="wave-text">登录中...</span></template>
+                <template v-else>登录</template>
+              </a-button>
             </a-form-item>
           
           </div>
@@ -329,57 +348,49 @@ onMounted(() => {
           
           <div>
             <a-form-item>
-                <a-input v-model:value="signUpForm.username" placeholder="请输入用户名" size="large" class="input-v">
-                    <template #prefix>
-                        <UserOutlined style="margin-right: 0.5rem;margin-left: 0.5rem;" />
-                    </template>
-                </a-input>
+              <a-input v-model:value="signUpForm.username" placeholder="请输入用户名" size="large" class="input-v">
+                <template #prefix>
+                  <UserOutlined style="margin-right: 0.5rem;margin-left: 0.5rem;" />
+                </template>
+              </a-input>
             </a-form-item>
 
             <a-form-item>
-                <a-input v-model:value="signUpForm.password" placeholder="请输入密码" type="password" size="large" class="input-v">
-                    <template #prefix>
-                        <LockOutlined style="margin-right: 0.5rem;margin-left: 0.5rem;" />
-                    </template>
-                </a-input>
+              <a-input v-model:value="signUpForm.password" placeholder="请输入密码" type="password" size="large" class="input-v">
+                <template #prefix>
+                  <LockOutlined style="margin-right: 0.5rem;margin-left: 0.5rem;" />
+                </template>
+              </a-input>
             </a-form-item>
 
             <a-form-item>
-                <a-input v-model:value="signUpForm.phone" placeholder="请输入手机号" size="large" class="input-v">
-                    <template #prefix>
-                        <PhoneOutlined style="margin-right: 0.5rem;margin-left: 0.5rem;" />
-                    </template>
-                </a-input>
+              <a-input v-model:value="signUpForm.phone" placeholder="请输入手机号" size="large" class="input-v">
+                <template #prefix>
+                  <PhoneOutlined style="margin-right: 0.5rem;margin-left: 0.5rem;" />
+                </template>
+              </a-input>
             </a-form-item>
 
             <a-form-item>
-                <a-input v-model:value="signUpForm.email" placeholder="请输入邮箱" size="large" class="input-v">
-                    <template #prefix>
-                        <MailOutlined style="margin-right: 0.5rem;margin-left: 0.5rem;" />
-                    </template>
-                </a-input>
+              <a-input v-model:value="signUpForm.email" placeholder="请输入邮箱" size="large" class="input-v">
+                <template #prefix>
+                  <MailOutlined style="margin-right: 0.5rem;margin-left: 0.5rem;" />
+                </template>
+              </a-input>
             </a-form-item>
 
             <a-form-item label="性別">
-                <a-radio-group v-model:value="signUpForm.gender" style="display: flex;justify-content: flex-start;margin-left: 20px;">
-                    <a-radio :value="1">男</a-radio>
-                    <a-radio :value="2">女</a-radio>
-                </a-radio-group>
+              <a-radio-group v-model:value="signUpForm.gender" style="display: flex;justify-content: flex-start;margin-left: 20px;">
+                <a-radio :value="1">男</a-radio>
+                <a-radio :value="2">女</a-radio>
+              </a-radio-group>
             </a-form-item>
 
             <a-form-item>
-                <a-button type="primary" :loading="loading" 
-                  @click="triggerSignUp" 
-                  @click.native="createRipple" 
-                  class="custom-button"
-                >
-                <template v-if="signUpPending">
-                  <span class="wave-text">注册中...</span>
-                </template>
-                <template v-else>
-                  注册
-                </template>
-                </a-button>
+              <a-button type="primary" :loading="loading" @click="triggerSignUp" @click.native="createRipple" class="custom-button">
+                <template v-if="signUpPending"><span class="wave-text">注册中...</span></template>
+                <template v-else>注册</template>
+              </a-button>
             </a-form-item>
           </div>
         </a-form>
