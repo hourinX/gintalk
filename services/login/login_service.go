@@ -38,11 +38,6 @@ func UserLogin(c *gin.Context, model *UserLoginModel) (*ReadUserLoginModel, erro
 	if len(aesKey) != 16 && len(aesKey) != 24 && len(aesKey) != 32 {
 		return nil, fmt.Errorf("AES key 长度不正确: %d", len(aesKey))
 	}
-
-	// cipherBytes, err := base64.StdEncoding.DecodeString(model.Password)
-	// if err != nil {
-	// 	return nil, errors.New("密码 base64 解码失败")
-	// }
 	plainPasswordBytes, err := utils.AESDecrypt(model.Password, aesKey)
 	if err != nil {
 		return nil, errors.New("密码 AES 解密失败" + err.Error())
