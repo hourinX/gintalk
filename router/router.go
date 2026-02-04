@@ -14,6 +14,7 @@ func SetupRouter() *gin.Engine {
 	InitializeLoginRouter(r)
 	InitializeUserRouter(r)
 	InitializeLogRouter(r)
+	InitializeLWsRouter(r)
 	// InitializeGroupRouter(r)
 
 	return r

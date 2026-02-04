@@ -1,4 +1,4 @@
-    import { createApp } from 'vue'
+import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
 import App from './App.vue'
@@ -11,6 +11,13 @@ import Icons from './components/icons'
 import "@/assets/main.less"
 
 import { playSound } from './utils/sound';
+import { createWs } from './utils/ws';
+
+const userId = JSON.parse(localStorage.getItem('user'))?.id;
+const token = localStorage.getItem('access_token');
+if (userId && token) {
+    createWs(userId, token);
+}
 
 const app = createApp(App)
 
