@@ -32,14 +32,14 @@ func UserLogin(c *gin.Context, model *UserLoginModel) (*ReadUserLoginModel, erro
 	}
 
 	var captchaAsw string
-	err := redis.Get(fmt.Sprintf("captcha_%s", model.CaptchaId), &captchaAsw)
+	err := redis.Get(fmt.Sprintf("gcaptcha_%s", model.CaptchaId), &captchaAsw)
 	if err != nil {
 		return nil, errors.New("验证码已过期或不存在")
 	}
 	if model.Captcha != captchaAsw {
 		return nil, errors.New("验证码校验失败")
 	}
-	err = redis.Delete(fmt.Sprintf("captcha_%s", model.CaptchaId))
+	err = redis.Delete(fmt.Sprintf("gcaptcha_%s", model.CaptchaId))
 	if err != nil {
 		return nil, fmt.Errorf("删除验证码缓存失败: %w", err)
 	}
@@ -160,7 +160,7 @@ func UserCaptcha(c *gin.Context) (*ReadCaptchaModel, error) {
 		Id:          id,
 		Base64Image: base64s,
 	}
-	redis.Set(fmt.Sprintf("captcha_%s", id), asw, 2*time.Minute)
+	redis.Set(fmt.Sprintf("gcaptcha_%s", id), asw, 2*time.Minute)
 	return result, nil
 }
 
